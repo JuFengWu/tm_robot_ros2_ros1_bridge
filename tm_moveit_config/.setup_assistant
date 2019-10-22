@@ -1,0 +1,11 @@
+moveit_setup_assistant_config:
+  URDF:
+    package: tm_grasp_description
+    relative_path: urdf/robot_hand_gazebo_plugin.urdf
+    xacro_args: ""
+  SRDF:
+    relative_path: config/tm700.srdf
+  CONFIG:
+    author_name: jufemgwu
+    author_email: leowu102000@gmail.com
+    generated_timestamp: 1571749036
