@@ -3,7 +3,7 @@
 This is techman_robot_grasp_ros2 ros1 bridge, so suggest to use it with [techman_robot_grasp_ros2](https://github.com/JuFengWu/techman_robot_grasp_ros2)
 
 :warning:
-This project is under construct.
+This project is under construction.
 
 ### Main purpose of this project
 In Ros2, Moveit is still in alpha version. The stable Moveit is still in Ros1.
