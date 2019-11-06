@@ -19,6 +19,7 @@ public:
   JointTrajectoryAction(std::string name) :
     actionServer(rosNode, name, boost::bind(&JointTrajectoryAction::executeCB, this, _1), false)
   {
+    ROS_INFO("initial JointTrajectoryAction");
     actionServer.start();
   }
 
@@ -27,21 +28,32 @@ public:
   }
 
   void printTrajectoryJointName(trajectory_msgs::JointTrajectory trajectory){
-    std::cout<<"trajectory joint name are:"<<std::endl;
+    ROS_INFO("trajectory joint name are:");
     for (int i =0;i<trajectory.joint_names.size();i++){
       std::cout<<"the "<<i<<" name is "<<trajectory.joint_names[i]<<std::endl;
     }
+    ROS_INFO("the points number are");
+    std::cout<<trajectory.points.size()<<std::endl;
+
+    for(int i=0;i<trajectory.points.size();i++){
+      std::cout<<trajectory.points[i].positions[0]<<","<<trajectory.points[i].positions[1]<<","<<trajectory.points[i].positions[2]<<","<<
+      trajectory.points[i].positions[3]<<","<<trajectory.points[i].positions[4]<<","<<trajectory.points[i].positions[5]<<std::endl;
+    }
+
   }
 
   void executeCB(const control_msgs::FollowJointTrajectoryGoalConstPtr msg)
   {
-    std::cout<<"exec action moveit server "<<std::endl;
+    ROS_INFO("exec action moveit server ");
     if(!(*msg).trajectory.points.empty()){
       currentTrajectory = (*msg).trajectory;
       printTrajectoryJointName(currentTrajectory);
     }
     else{
       ROS_ERROR("joint trajectory from moveit is null!");
+    }
+    if(actionServer.isActive()){
+      actionServer.setSucceeded();
     }
   }
 
