@@ -2,6 +2,9 @@
 :warning:
 This is techman_robot_grasp_ros2 ros1 bridge, so suggest to use it with [techman_robot_grasp_ros2](https://github.com/JuFengWu/techman_robot_grasp_ros2)
 
+:warning:
+This project is under construct.
+
 ### Main purpose of this project
 In Ros2, Moveit is still in alpha version. The stable Moveit is still in Ros1.
 So I create this project to launch moveit and send the robot joint trajectory to ros2.
