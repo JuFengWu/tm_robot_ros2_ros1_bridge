@@ -12,7 +12,13 @@ So I create this project to launch moveit and send the robot joint trajectory to
 ### Test Moveit functoin on Ros1 envirnoment
 1. Build this project.
 2. Open a terminal and type ``rosrun moveit_action_pkg get_trajectory``
-3. Open another terminal and type ``roslaunch moveit_action_pkg tm_movit_bringup.launch ``, the rviz, moveit and joint_state_publisher will be launched.
+3. Open another terminal and type ``roslaunch moveit_action_pkg tm_movit_bringup_test1.launch ``, the rviz, moveit and joint_state_publisher will be launched.
 4. Use the gui of joint_state_publisher to move robot to the place you want it to move.
 5. Click the "plainning" button, you can see the "Plan and Execute" button.
 6. Click "Plan and Execute" button, you can see the terminal 1 shows up the points which ready send back to Ros2.
+
+### Test Moveit function without 3rd part apps
+1. Build this project
+2. Open a terminal and type ``roslaunch moveit_action_pkg tm_movit_bringup_test2.launch``
+3. Open another terminal and type ``rosrun moveit_action_pkg set_command``.
+4. You can see the first terminal show up the trajectory points.
