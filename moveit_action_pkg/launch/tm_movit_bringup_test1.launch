@@ -7,12 +7,12 @@
 <arg name="debug" default="false" />
 
 <!--For test, we use joint_state_publisher
-
+-->
 <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher">
     <param name="use_gui" value="true"/>
     
   </node>
--->
+
 <!-- Robot state publisher -->
 <node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher">
   <param name="publish_frequency" type="double" value="50.0" />
@@ -28,14 +28,11 @@
     <arg name="debug" value="$(arg debug)"/>
     <arg name="pipeline" value="$(arg pipeline)"/>
 </include>
-
-<!--
 <include file="$(find tm_moveit_config)/launch/moveit_rviz.launch">
     <arg name="rviz_config" value="$(find tm_moveit_config)/launch/moveit.rviz"/>
     <arg name="debug" value="$(arg debug)"/>
   </include>
+<!--
+<node pkg="moveit_action_pkg" type="get_trajectory" name="get_trajectory"/>
 -->
-
-<node pkg="moveit_action_pkg" type="get_trajectory" name="get_trajectory" output="screen"/>
-
 </launch>
