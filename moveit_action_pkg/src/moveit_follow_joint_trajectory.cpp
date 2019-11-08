@@ -48,6 +48,7 @@ public:
     if(!(*msg).trajectory.points.empty()){
       currentTrajectory = (*msg).trajectory;
       printTrajectoryJointName(currentTrajectory);
+      
     }
     else{
       ROS_ERROR("joint trajectory from moveit is null!");
@@ -64,6 +65,8 @@ public:
 int main(int argc, char** argv)
 {
   ros::init(argc, argv, "tm_joint_trajectory_action");
+
+  ROS_INFO("in JointTrajectoryAction main!!!!!!!");
 
   JointTrajectoryAction jointTrajectoryAction("tm_arm_controller/follow_joint_trajectory");
   ros::spin();

@@ -1,11 +1,8 @@
-#include "../include/ros_move.h"
+#include "../include/moveit_interaction.h"
 #include<iostream>
-#include <memory>
-#include<string>
+
 namespace robot_move_api{
     void RosMove::ros_initial(){
-        
-        
         
         PLANNING_GROUP = "tm_arm";
         _move_group = new moveit::planning_interface::MoveGroupInterface(PLANNING_GROUP);
@@ -19,7 +16,6 @@ namespace robot_move_api{
         if(isPlan){
           moveit::planning_interface::MoveGroupInterface::Plan my_plan;
           success = (_move_group->plan(my_plan) == moveit::planning_interface::MoveItErrorCode::SUCCESS);            
-          ROS_INFO("B");
         }
         else{        
           _move_group->move();
@@ -38,20 +34,25 @@ namespace robot_move_api{
         target_pose1.position.x = cartesianTarget[0];
         target_pose1.position.y = cartesianTarget[1];
         target_pose1.position.z = cartesianTarget[2];
-        std::vector<geometry_msgs::Pose> waypoint;
-        waypoint.push_back(target_pose1);
-        moveit_msgs::RobotTrajectory trajectory;
+        
+        return cartesian_move(target_pose1,isPlan);
+    }
 
-        moveit::planning_interface::MoveGroupInterface::Plan my_plan;
-        //bool success = (_move_group->plan(my_plan) == moveit::planning_interface::MoveItErrorCode::SUCCESS);
-        //double fraction = _move_group->computeCartesianPath(waypoint, eef_step, jump_threshold, trajectory);
-        _move_group->computeCartesianPath(waypoint, eef_step, jump_threshold, trajectory);
+    bool RosMove::cartesian_move(geometry_msgs::Pose cartesianTarget, bool isPlan){
+      std::vector<geometry_msgs::Pose> waypoint;
+      waypoint.push_back(cartesianTarget);
+      moveit_msgs::RobotTrajectory trajectory;
 
-        if(!isPlan){
-            my_plan.trajectory_ = trajectory;
-            _move_group->execute(my_plan);
-        }
-        return true;
+      moveit::planning_interface::MoveGroupInterface::Plan my_plan;
+      //bool success = (_move_group->plan(my_plan) == moveit::planning_interface::MoveItErrorCode::SUCCESS);
+      //double fraction = _move_group->computeCartesianPath(waypoint, eef_step, jump_threshold, trajectory);
+      _move_group->computeCartesianPath(waypoint, eef_step, jump_threshold, trajectory);
+
+      if(!isPlan){
+        my_plan.trajectory_ = trajectory;
+        _move_group->execute(my_plan);
+      }
+      return true;
     }
     int RosMove::get_joint_number(){
         std::vector<double> joint_group_positions;
@@ -71,6 +72,9 @@ namespace robot_move_api{
         endEffectorPosition.push_back(pose.orientation.z);
         return endEffectorPosition;
     }
+    geometry_msgs::Pose RosMove::current_end_effector_position(){
+      return _move_group->getCurrentPose().pose;
+    }
     std::vector<double> RosMove::get_current_joint_position(){
         std::vector<double> joint_group_positions;
         moveit::core::RobotStatePtr current_state = _move_group->getCurrentState();
@@ -88,8 +92,8 @@ namespace robot_move_api{
       return jointRad;
     }
 
-    RobotJointStatePub::RobotJointStatePub(ros::NodeHandle node_handle,std::vector<double> initialJointPosition){
-      chatter_pub = node_handle.advertise<sensor_msgs::JointState>("joint_states", 1000);
+    RobotJointStatePub::RobotJointStatePub(ros::NodeHandle nodeHandle,std::vector<double> initialJointPosition){
+      chatterPub = nodeHandle.advertise<sensor_msgs::JointState>("joint_states", 1000);
 
       set_joint_name();
       set_new_joint_position(initialJointPosition);
@@ -109,7 +113,7 @@ namespace robot_move_api{
             msg.position = lastJointPosition;
         }
         msg.position = currentJointPosition;
-        chatter_pub.publish(msg);
+        chatterPub.publish(msg);
         ros::spinOnce();
         loop_rate.sleep();
       }
@@ -148,39 +152,4 @@ namespace robot_move_api{
       isSettingJointPosition = false;
       return true;
     }
-}
-
-int main(int argc, char** argv){
-  ros::init(argc, argv, "tm_move_api");
-  ros::AsyncSpinner spinner(2);
-  spinner.start();
-  ros::NodeHandle node_handle;
-
-  std::vector<double> initialJointPosition{0.0,0.0,90.0,0.0,90.0,0.0};
-
-  auto initialJointPositionRad = robot_move_api::RosMove::joint_degs_to_joint_rads(initialJointPosition);
-  std::unique_ptr<robot_move_api::RobotJointStatePub> robotJointStatePub = std::make_unique<robot_move_api::RobotJointStatePub>(node_handle,initialJointPositionRad);
-
-  std::unique_ptr<robot_move_api::RosMove> robotCmd = std::make_unique<robot_move_api::RosMove>("tm_robot");
-
-  std::vector<double> jointTarget{21.0,32.0,90.0,43.0,90.0,8.0};
-  
-  auto jointTargetRad = robot_move_api::RosMove::joint_degs_to_joint_rads(jointTarget);
-  
-  robotCmd->joint_move(jointTargetRad,false);
-
-  std::cout<<"finish send joint command!"<<std::endl;
-
-  auto currentPistion = robotCmd->get_current_end_effector_position();
-  
-  std::cout<<"current position is:";
-  for(int i=0;i<currentPistion.size();i++){
-    std::cout<<currentPistion[i]<<",";
-  }
-  currentPistion[1]+=0.1;
-  currentPistion[2]-=0.1;
-  
-  robotCmd->cartesian_move(currentPistion,false);
-  std::cout<<"finish send cartesian command!"<<std::endl;
-  return 0;
 }

@@ -25,8 +25,10 @@ namespace robot_move_api{
     };
     bool joint_move(std::vector<double> jointTarget, bool isPlan);
     bool cartesian_move(std::vector<double> cartesianTarget, bool isPlan);
+    bool cartesian_move(geometry_msgs::Pose cartesianTarget, bool isPlan);
     int get_joint_number();
     std::vector<double> get_current_end_effector_position();
+    geometry_msgs::Pose current_end_effector_position();
     std::vector<double> get_current_joint_position();
     static double degree_to_rad(double degree);
     static std::vector<double> joint_degs_to_joint_rads(std::vector<double> jointDegrees);
@@ -38,12 +40,12 @@ namespace robot_move_api{
     std::vector<double> lastJointPosition;
     std::vector<std::string> jointNames;
     const int publishHz = 10;
-    ros::Publisher chatter_pub;
+    ros::Publisher chatterPub;
     bool isSettingJointPosition = false;
     void set_joint_name();
     bool isPublish = true;
   public:
-    RobotJointStatePub(ros::NodeHandle node_handle,std::vector<double> initialJointPosition);
+    RobotJointStatePub(ros::NodeHandle nodeHandle,std::vector<double> initialJointPosition);
     void message_publish();
     bool set_new_joint_position(std::vector<double> newJointPosition);
     ~RobotJointStatePub(){
