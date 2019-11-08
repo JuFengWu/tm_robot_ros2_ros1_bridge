@@ -13,6 +13,7 @@ find_package(catkin REQUIRED COMPONENTS
   moveit_ros_planning_interface
   roscpp
   moveit_visual_tools
+  geometry_msgs
 )
 
 
@@ -33,3 +34,6 @@ target_link_libraries(get_trajectory ${catkin_LIBRARIES})
 
 add_executable(set_command src/test_moveit_interaction.cpp src/moveit_interaction.cpp)
 target_link_libraries(set_command ${catkin_LIBRARIES})
+
+add_executable(pass_moveit src/pass_ros_command_to_moveit.cpp src/moveit_interaction.cpp)
+target_link_libraries(pass_moveit ${catkin_LIBRARIES})
