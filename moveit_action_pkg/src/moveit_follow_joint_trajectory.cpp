@@ -12,22 +12,41 @@ protected:
   actionlib::SimpleActionServer<control_msgs::FollowJointTrajectoryAction> actionServer;
   trajectory_msgs::JointTrajectory currentTrajectory;
 
-  control_msgs::FollowJointTrajectoryResult result;  
+  control_msgs::FollowJointTrajectoryResult result; 
+  ros::Publisher jointTrajectoryPub;
+  const int tmRobotJointNumber = 6;
 
 public:
 
   JointTrajectoryAction(std::string name) :
-    actionServer(rosNode, name, boost::bind(&JointTrajectoryAction::executeCB, this, _1), false)
+    actionServer(rosNode, name, boost::bind(&JointTrajectoryAction::execute_cb, this, _1), false)
   {
     ROS_INFO("initial JointTrajectoryAction");
     actionServer.start();
+    jointTrajectoryPub = rosNode.advertise<trajectory_msgs::JointTrajectory>("tm_moveit_joint_trajectory", 1000);
   }
 
   ~JointTrajectoryAction(void)
   {
   }
 
-  void printTrajectoryJointName(trajectory_msgs::JointTrajectory trajectory){
+  trajectory_msgs::JointTrajectory sort_trajecotry(trajectory_msgs::JointTrajectory moveitTrajectory){
+    trajectory_msgs::JointTrajectory tmRobotTrajecotry;
+    tmRobotTrajecotry.points.resize(tmRobotJointNumber);
+    for(int i=0;i<moveitTrajectory.points.size();i++){
+      for(int j=0;j<moveitTrajectory.points[i].positions.size();i++){
+        tmRobotTrajecotry.points[j].positions.push_back(moveitTrajectory.points[i].positions[j]);
+      }
+    }
+  }
+
+  void publish_trajectory(trajectory_msgs::JointTrajectory trajectory){
+    ROS_INFO("publish trajecotry!");
+    auto tmRobotTrajecotry = sort_trajecotry(trajectory);
+    jointTrajectoryPub.publish(tmRobotTrajecotry);
+  }
+
+  void print_trajectory(trajectory_msgs::JointTrajectory trajectory){
     ROS_INFO("trajectory joint name are:");
     for (int i =0;i<trajectory.joint_names.size();i++){
       std::cout<<"the "<<i<<" name is "<<trajectory.joint_names[i]<<std::endl;
@@ -42,13 +61,14 @@ public:
 
   }
 
-  void executeCB(const control_msgs::FollowJointTrajectoryGoalConstPtr msg)
+  void execute_cb(const control_msgs::FollowJointTrajectoryGoalConstPtr msg)
   {
     ROS_INFO("exec action moveit server ");
     if(!(*msg).trajectory.points.empty()){
       currentTrajectory = (*msg).trajectory;
-      printTrajectoryJointName(currentTrajectory);
-      
+      print_trajectory(currentTrajectory);
+      publish_trajectory(currentTrajectory);
+      ros::spinOnce();
     }
     else{
       ROS_ERROR("joint trajectory from moveit is null!");
