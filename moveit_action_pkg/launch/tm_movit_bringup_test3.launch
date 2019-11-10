@@ -27,7 +27,10 @@
     <arg name="info" value="true"/>
     <arg name="debug" value="$(arg debug)"/>
     <arg name="pipeline" value="$(arg pipeline)"/>
+    
 </include>
+
+<param name="move_group/trajectory_execution/execution_duration_monitoring" value="false" />
 
 <!--
 <include file="$(find tm_moveit_config)/launch/moveit_rviz.launch">
@@ -37,5 +40,6 @@
 -->
 
 <node pkg="moveit_action_pkg" type="get_trajectory" name="get_trajectory" output="screen"/>
+<node pkg="moveit_action_pkg" type="pass_moveit" name="pass_moveit" output="screen"/>
 
 </launch>

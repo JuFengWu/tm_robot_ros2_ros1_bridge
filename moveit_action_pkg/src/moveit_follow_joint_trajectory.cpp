@@ -34,25 +34,23 @@ public:
     trajectory_msgs::JointTrajectory tmRobotTrajecotry;
     tmRobotTrajecotry.points.resize(tmRobotJointNumber);
     for(int i=0;i<moveitTrajectory.points.size();i++){
-      for(int j=0;j<moveitTrajectory.points[i].positions.size();i++){
+      for(int j=0;j<moveitTrajectory.points[i].positions.size();j++){
         tmRobotTrajecotry.points[j].positions.push_back(moveitTrajectory.points[i].positions[j]);
       }
     }
+    return tmRobotTrajecotry;
   }
 
   void publish_trajectory(trajectory_msgs::JointTrajectory trajectory){
-    ROS_INFO("publish trajecotry!");
     auto tmRobotTrajecotry = sort_trajecotry(trajectory);
     jointTrajectoryPub.publish(tmRobotTrajecotry);
   }
 
   void print_trajectory(trajectory_msgs::JointTrajectory trajectory){
-    ROS_INFO("trajectory joint name are:");
     for (int i =0;i<trajectory.joint_names.size();i++){
       std::cout<<"the "<<i<<" name is "<<trajectory.joint_names[i]<<std::endl;
     }
-    ROS_INFO("the points number are");
-    std::cout<<trajectory.points.size()<<std::endl;
+    std::cout<<"the points number are "<<trajectory.points.size()<<std::endl;
 
     for(int i=0;i<trajectory.points.size();i++){
       std::cout<<trajectory.points[i].positions[0]<<","<<trajectory.points[i].positions[1]<<","<<trajectory.points[i].positions[2]<<","<<
@@ -63,7 +61,6 @@ public:
 
   void execute_cb(const control_msgs::FollowJointTrajectoryGoalConstPtr msg)
   {
-    ROS_INFO("exec action moveit server ");
     if(!(*msg).trajectory.points.empty()){
       currentTrajectory = (*msg).trajectory;
       print_trajectory(currentTrajectory);
