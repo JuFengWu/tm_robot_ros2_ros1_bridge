@@ -28,5 +28,5 @@ include_directories(
   ${catkin_INCLUDE_DIRS}
 )
 
-add_executable(test_ros2_send_get src/test_ros2_send_get.cpp)
-target_link_libraries(test_ros2_send_get ${catkin_LIBRARIES})
+add_executable(ros2_send_get_simulator src/ros2_send_get_simulator.cpp)
+target_link_libraries(ros2_send_get_simulator ${catkin_LIBRARIES})
