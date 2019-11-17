@@ -30,3 +30,6 @@ include_directories(
 
 add_executable(ros2_send_get_simulator src/ros2_send_get_simulator.cpp)
 target_link_libraries(ros2_send_get_simulator ${catkin_LIBRARIES})
+
+add_executable(test_get_send_bridge src/test_get_send_from_bridge.cpp)
+target_link_libraries(test_get_send_bridge ${catkin_LIBRARIES})
