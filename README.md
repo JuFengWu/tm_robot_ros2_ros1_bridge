@@ -30,10 +30,11 @@ So I create this project to launch Moveit and send the robot joint trajectory ba
 5. There are two trajectory. The first is send joint target and current joint position to get the trajevtories; the second is send cartesian target and current joint position to get the trajevtories.
 
 ### Use Ros2 test send package to send and get commnad
-:warning: warning!!
+:warning: Warning!!
 1. This test is not only use this project, but also use [this project](https://github.com/JuFengWu/ros2_basic_test_and_example)
 2. This test is also use Ros2. Before use this test, please make sure you have [installed ros2](https://index.ros.org/doc/ros2/Installation/) in your computer.
 ---
+The steps are:
 1. Build this project.
 2. Open terminal and type ``roslaunch ros2_send_command_test test_bridge.launch``
 3. Open a new terminal to create ros2 ros1_bridge by typing those cmds
