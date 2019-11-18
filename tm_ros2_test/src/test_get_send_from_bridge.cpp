@@ -23,7 +23,7 @@ void joint_trajectory_sub_callback(const sensor_msgs::JointState::ConstPtr& msg)
 int main(int argc, char** argv){
   
   ros::init(argc, argv, "test_ros2_send_get");
-  ros::AsyncSpinner spinner(5);
+  ros::AsyncSpinner spinner(2);
   spinner.start();
   
   ros::NodeHandle nodeHandle;
@@ -33,20 +33,18 @@ int main(int argc, char** argv){
   auto jointTrajectorySub = nodeHandle.subscribe("bridge_jointState_to_ros1", 1000,joint_trajectory_sub_callback);
   auto currentPositionSub = nodeHandle.subscribe("bridge_pose_to_ros1",1000, current_position_sub_callback);
 
-  ros::Rate loop_rate(10);
+  ros::Rate loop_rate(1);
 
-  std::vector<double> jointTarget{0.0,0.0,0.0,0.0,0.0,0.0};
+
   int counter=0;
   trajectory_msgs::JointTrajectory JointTrajectoryMsg;
   while (ros::ok())
   {
-    
     JointTrajectoryMsg.points.resize(2);
-
     
     for(unsigned int i=0; i<JointTrajectoryMsg.points.size();i++){
       JointTrajectoryMsg.points[i].positions.resize(2);
-      for(unsigned int j=0;i<JointTrajectoryMsg.points[i].positions.size();j++){
+      for(unsigned int j=0;j<JointTrajectoryMsg.points[i].positions.size();j++){
         JointTrajectoryMsg.points[i].positions[j]=counter;
       }
     }
@@ -56,7 +54,6 @@ int main(int argc, char** argv){
     cmdPosition.position.x =counter;
     cmdPosition.position.y =counter;
     cmdPosition.position.z =counter;
-
     poseChatter.publish(cmdPosition);
 
     counter++;
