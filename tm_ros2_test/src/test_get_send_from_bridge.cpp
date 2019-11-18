@@ -48,6 +48,15 @@ int main(int argc, char** argv){
         JointTrajectoryMsg.points[i].positions[j]=counter;
       }
     }
+
+    std::cout<<"trajectory.points size is"<<JointTrajectoryMsg.points.size()<<std::endl; // error is there
+        for(unsigned int i=0; i<JointTrajectoryMsg.points.size();i++){          
+          std::cout<<"points "<<i<<"are ";
+          for(unsigned int j=0;j<JointTrajectoryMsg.points[i].positions.size();j++){
+            std::cout<<JointTrajectoryMsg.points[j].positions[i]<<",";
+          }
+        std::cout<<std::endl;
+    }
     trajectoryChatter.publish(JointTrajectoryMsg);
 
     geometry_msgs::Pose cmdPosition;
