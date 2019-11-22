@@ -5,20 +5,29 @@ namespace robot_move_api{
     void RosMove::ros_initial(){
         
         PLANNING_GROUP = "tm_arm";
-        _move_group = new moveit::planning_interface::MoveGroupInterface(PLANNING_GROUP);
-        _joint_model_group =_move_group->getCurrentState()->getJointModelGroup(PLANNING_GROUP);
-        _visual_tools = new moveit_visual_tools::MoveItVisualTools("base_link");      
+        moveGroup = std::make_unique<moveit::planning_interface::MoveGroupInterface>(PLANNING_GROUP);
+        jointModelGroup =moveGroup->getCurrentState()->getJointModelGroup(PLANNING_GROUP);
+        visualTools = std::make_unique <moveit_visual_tools::MoveItVisualTools>("base_link");
+        planningSceneDiffPublisher = nodeHandle.advertise<moveit_msgs::PlanningScene>("planning_scene", 1);
+        ros::WallDuration sleepTime(0.5);
+        while (planningSceneDiffPublisher.getNumSubscribers() < 1)
+        {
+          sleepTime.sleep();
+        }      
         
     }
+    RosMove::RosMove(std::string robotName){
+      ros_initial();
+    };
     bool RosMove::joint_move(std::vector<double> jointTarget, bool isPlan){
-        _move_group->setJointValueTarget(jointTarget);
+        moveGroup->setJointValueTarget(jointTarget);
         bool success;
         if(isPlan){
           moveit::planning_interface::MoveGroupInterface::Plan my_plan;
-          success = (_move_group->plan(my_plan) == moveit::planning_interface::MoveItErrorCode::SUCCESS);            
+          success = (moveGroup->plan(my_plan) == moveit::planning_interface::MoveItErrorCode::SUCCESS);            
         }
         else{        
-          _move_group->move();
+          moveGroup->move();
           success = true;
         }
         return success;
@@ -43,25 +52,38 @@ namespace robot_move_api{
       waypoint.push_back(cartesianTarget);
       moveit_msgs::RobotTrajectory trajectory;
 
-      moveit::planning_interface::MoveGroupInterface::Plan my_plan;
-      //bool success = (_move_group->plan(my_plan) == moveit::planning_interface::MoveItErrorCode::SUCCESS);
-      //double fraction = _move_group->computeCartesianPath(waypoint, eef_step, jump_threshold, trajectory);
-      _move_group->computeCartesianPath(waypoint, eef_step, jump_threshold, trajectory);
+      //moveit::planning_interface::MoveGroupInterface::Plan my_plan;
 
+      //moveGroup->computeCartesianPath(waypoint, eef_step, jump_threshold, trajectory);
+      moveGroup->setStartState(*moveGroup->getCurrentState());
+      moveGroup->setPoseTarget(cartesianTarget);
+
+
+      //if(!isPlan){
+      //  my_plan.trajectory_ = trajectory;
+      //  moveGroup->execute(my_plan);
+      //}
+      bool success;
       if(!isPlan){
-        my_plan.trajectory_ = trajectory;
-        _move_group->execute(my_plan);
+        moveit::planning_interface::MoveGroupInterface::Plan my_plan;
+        success = (moveGroup->plan(my_plan) == moveit::planning_interface::MoveItErrorCode::SUCCESS);
       }
-      return true;
+      
+      moveGroup->move();
+      success = true;
+      
+      
+      return success;
+      //return true;
     }
     int RosMove::get_joint_number(){
         std::vector<double> joint_group_positions;
-        moveit::core::RobotStatePtr current_state = _move_group->getCurrentState();
-        current_state->copyJointGroupPositions(_joint_model_group, joint_group_positions);
+        moveit::core::RobotStatePtr current_state = moveGroup->getCurrentState();
+        current_state->copyJointGroupPositions(jointModelGroup, joint_group_positions);
         return joint_group_positions.size();
     }
     std::vector<double> RosMove::get_current_end_effector_position(){
-        geometry_msgs::Pose pose = _move_group->getCurrentPose().pose;
+        geometry_msgs::Pose pose = moveGroup->getCurrentPose().pose;
         std::vector<double> endEffectorPosition;
         endEffectorPosition.push_back(pose.position.x);
         endEffectorPosition.push_back(pose.position.y);
@@ -73,12 +95,12 @@ namespace robot_move_api{
         return endEffectorPosition;
     }
     geometry_msgs::Pose RosMove::current_end_effector_position(){
-      return _move_group->getCurrentPose().pose;
+      return moveGroup->getCurrentPose().pose;
     }
     std::vector<double> RosMove::get_current_joint_position(){
         std::vector<double> joint_group_positions;
-        moveit::core::RobotStatePtr current_state = _move_group->getCurrentState();
-        current_state->copyJointGroupPositions(_joint_model_group, joint_group_positions);
+        moveit::core::RobotStatePtr current_state = moveGroup->getCurrentState();
+        current_state->copyJointGroupPositions(jointModelGroup, joint_group_positions);
         return joint_group_positions;
     }
     double RosMove::degree_to_rad(double degree){
@@ -90,6 +112,33 @@ namespace robot_move_api{
         jointRad.push_back(RosMove::degree_to_rad(degree));
       }
       return jointRad;
+    }
+
+    bool RosMove::add_solid_to_moveit(shape_msgs::SolidPrimitive obj,geometry_msgs::Pose position,std::string objectName){
+      moveit_msgs::AttachedCollisionObject sceneAddObject;
+
+      sceneAddObject.object.header.frame_id = moveGroup->getPlanningFrame();
+      sceneAddObject.object.id = objectName;
+      sceneAddObject.object.primitives.push_back(obj);
+      sceneAddObject.object.primitive_poses.push_back(position);
+      sceneAddObject.object.operation = sceneAddObject.object.ADD;
+
+      
+      planningScene.world.collision_objects.push_back(sceneAddObject.object);
+      planningScene.is_diff = true;
+      
+      planningSceneDiffPublisher.publish(planningScene);
+    }
+    bool RosMove::remove_soild_from_moveit(std::string objectName){
+      moveit_msgs::CollisionObject removeObject;
+      removeObject.id = objectName;
+      removeObject.header.frame_id = moveGroup->getPlanningFrame();
+      removeObject.operation = removeObject.REMOVE;
+
+      
+      //planningScene.world.collision_objects.clear();
+      planningScene.world.collision_objects.push_back(removeObject);
+      planningSceneDiffPublisher.publish(planningScene);
     }
 
     RobotJointStatePub::RobotJointStatePub(ros::NodeHandle nodeHandle,std::vector<double> initialJointPosition){

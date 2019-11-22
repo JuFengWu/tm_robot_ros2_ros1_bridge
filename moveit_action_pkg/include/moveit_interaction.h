@@ -13,16 +13,22 @@ namespace robot_move_api{
   {
   private:
       std::string PLANNING_GROUP ;
-      void ros_initial();
-      moveit::planning_interface::MoveGroupInterface *_move_group;
-      moveit_visual_tools::MoveItVisualTools *_visual_tools;
-      const robot_state::JointModelGroup* _joint_model_group;
+      std::unique_ptr<moveit::planning_interface::MoveGroupInterface> moveGroup;
+      std::unique_ptr<moveit_visual_tools::MoveItVisualTools> visualTools;
+      const robot_state::JointModelGroup* jointModelGroup;
       const double jump_threshold =0.0;
       const double eef_step = 0.01;
+      ros::Publisher planningSceneDiffPublisher;
+      ros::NodeHandle nodeHandle;
+      moveit_msgs::PlanningScene planningScene;
+
+      void ros_initial();
   public:
-    RosMove(std::string robotName){
-      ros_initial();
-    };
+    static double degree_to_rad(double degree);
+    static std::vector<double> joint_degs_to_joint_rads(std::vector<double> jointDegrees);
+
+    RosMove(std::string robotName);
+
     bool joint_move(std::vector<double> jointTarget, bool isPlan);
     bool cartesian_move(std::vector<double> cartesianTarget, bool isPlan);
     bool cartesian_move(geometry_msgs::Pose cartesianTarget, bool isPlan);
@@ -30,8 +36,9 @@ namespace robot_move_api{
     std::vector<double> get_current_end_effector_position();
     geometry_msgs::Pose current_end_effector_position();
     std::vector<double> get_current_joint_position();
-    static double degree_to_rad(double degree);
-    static std::vector<double> joint_degs_to_joint_rads(std::vector<double> jointDegrees);
+    bool add_solid_to_moveit(shape_msgs::SolidPrimitive obj,geometry_msgs::Pose position,std::string objectName);
+    bool remove_soild_from_moveit(std::string objectName);
+
   };
 
   class RobotJointStatePub{
