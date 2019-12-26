@@ -19,6 +19,8 @@
         <joint name="wrist_2_joint" />
         <joint name="wrist_3_joint" />
         <joint name="tip_fixed_joint" />
+        <joint name="camera_joint" />
+        <joint name="camera_optical_joint" />
     </group>
     <group name="gripper">
         <joint name="tip_link-tool0" />

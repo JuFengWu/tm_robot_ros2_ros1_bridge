@@ -3,16 +3,37 @@
 
   <arg name="model" default="$(find tm_grasp_description)/urdf/robot_hand_gazebo_plugin.urdf"/>
   <arg name="gui" default="true" />
-  <arg name="rvizconfig" default="$(find urdf_tutorial)/rviz/urdf.rviz" />
+  <arg name="rvizconfig" default="$(find rviz_control)/rviz/urdf.rviz" />
 
   <param name="robot_description" command="$(find xacro)/xacro --inorder $(arg model)" />
   <param name="use_gui" value="$(arg gui)"/>
 
+  <!--launch moveit_group-->
+  <include file="$(find tm_moveit_config)/launch/move_group.launch">
+    <arg name="allow_trajectory_execution" value="true"/>
+    <arg name="fake_execution" value="false"/>
+    <arg name="info" value="true"/>
+    <arg name="debug" value="false"/>
+    <arg name="pipeline" value="ompl"/>
+    
+  </include>
 
-
+  <node pkg="moveit_action_pkg" type="get_trajectory" name="get_trajectory" output="screen"/>
+<!--
   <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" />
+-->
   <node name="robot_state_publisher" pkg="robot_state_publisher" type="state_publisher" />
 
+ 
+  <node name = "rviz_control" pkg = "rviz_control" type="rviz_control" output="screen"/> 
+
+
+  <node name = "rviz_robot_status_simple_simulator" pkg="rviz_control" type = "rviz_robot_status_simple_simulator" output = "screen"/>
+
+
   <node name="rviz" pkg="rviz" type="rviz" args="-d $(arg rvizconfig)" required="true" />
+
+  <node name = "control_interactive_marker" pkg = "control_interactive_marker" type="control_interactive_marker" output="screen"/>
+
 
 </launch>

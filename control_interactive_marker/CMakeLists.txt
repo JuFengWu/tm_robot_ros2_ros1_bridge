@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(rviz_control)
+project(control_interactive_marker)
 
 ## Compile as C++11, supported in ROS Kinetic and newer
 add_compile_options(-std=c++14)
@@ -8,19 +8,17 @@ add_compile_options(-std=c++14)
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
-roscpp
-sensor_msgs
-moveit_core
-moveit_msgs
-moveit_ros_planning_interface
-eigen_conversions
+  roscpp
+  visualization_msgs
+  interactive_markers
+  tf
 )
 
 
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES moveit_action_pkg
-#  CATKIN_DEPENDS actionlib moveit_msgs
+#  CATKIN_DEPENDS actionlib 
 #  DEPENDS system_lib
 )
 
@@ -29,8 +27,5 @@ include_directories(
   ${catkin_INCLUDE_DIRS}
 )
 
-add_executable(rviz_robot_status_simple_simulator src/rviz_robot_status_simple_simulator.cpp src/tm_robot_modle.cpp)
-target_link_libraries(rviz_robot_status_simple_simulator ${catkin_LIBRARIES})
-
-add_executable(rviz_control src/rviz_control.cpp )
-target_link_libraries(rviz_control ${catkin_LIBRARIES})
+add_executable(control_interactive_marker src/robot_control_interactive_marker.cpp)
+target_link_libraries(control_interactive_marker ${catkin_LIBRARIES})
