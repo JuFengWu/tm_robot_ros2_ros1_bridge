@@ -76,12 +76,6 @@ namespace robot_move_api{
       return success;
       //return true;
     }
-    int RosMove::get_joint_number(){
-        std::vector<double> joint_group_positions;
-        moveit::core::RobotStatePtr current_state = moveGroup->getCurrentState();
-        current_state->copyJointGroupPositions(jointModelGroup, joint_group_positions);
-        return joint_group_positions.size();
-    }
     std::vector<double> RosMove::get_current_end_effector_position(){
         geometry_msgs::Pose pose = moveGroup->getCurrentPose().pose;
         std::vector<double> endEffectorPosition;
@@ -96,12 +90,6 @@ namespace robot_move_api{
     }
     geometry_msgs::Pose RosMove::current_end_effector_position(){
       return moveGroup->getCurrentPose().pose;
-    }
-    std::vector<double> RosMove::get_current_joint_position(){
-        std::vector<double> joint_group_positions;
-        moveit::core::RobotStatePtr current_state = moveGroup->getCurrentState();
-        current_state->copyJointGroupPositions(jointModelGroup, joint_group_positions);
-        return joint_group_positions;
     }
     double RosMove::degree_to_rad(double degree){
         return degree/180.0*M_PI;

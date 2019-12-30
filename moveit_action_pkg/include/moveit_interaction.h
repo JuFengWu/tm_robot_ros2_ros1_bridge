@@ -27,15 +27,13 @@ namespace robot_move_api{
     static double degree_to_rad(double degree);
     static std::vector<double> joint_degs_to_joint_rads(std::vector<double> jointDegrees);
 
-    RosMove(std::string robotName);
+    explicit RosMove(std::string robotName);
 
     bool joint_move(std::vector<double> jointTarget, bool isPlan);
     bool cartesian_move(std::vector<double> cartesianTarget, bool isPlan);
     bool cartesian_move(geometry_msgs::Pose cartesianTarget, bool isPlan);
-    int get_joint_number();
     std::vector<double> get_current_end_effector_position();
     geometry_msgs::Pose current_end_effector_position();
-    std::vector<double> get_current_joint_position();
     bool add_solid_to_moveit(shape_msgs::SolidPrimitive obj,geometry_msgs::Pose position,std::string objectName);
     bool remove_soild_from_moveit(std::string objectName);
 

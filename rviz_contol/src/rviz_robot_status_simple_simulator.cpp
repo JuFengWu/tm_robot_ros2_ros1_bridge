@@ -22,9 +22,8 @@ public:
   RvizRobotStatusSimulator();
 };
 
-RvizRobotStatusSimulator::RvizRobotStatusSimulator()
+RvizRobotStatusSimulator::RvizRobotStatusSimulator():robotModle(std::make_unique<TmGraspModel>())
 {
-  robotModle = std::make_unique<TmGraspModel>(); 
   jointStatePub = n.advertise<sensor_msgs::JointState>("joint_states", 1000);
   RvizRobotStatusSimulator::wait_connect_success(jointStatePub);
   targetJointSub = n.subscribe("tm_joint_target", 1000, &RvizRobotStatusSimulator::target_joint,this);
@@ -39,8 +38,6 @@ RvizRobotStatusSimulator::RvizRobotStatusSimulator()
 void RvizRobotStatusSimulator::joint_state_publish(){
 
   ros::Rate loopRate(100);
-  std::ostringstream s;
-  std::ostringstream mouse_point_ss;
 
   while(ros::ok()){
     targetJoint.header.stamp = ros::Time::now();

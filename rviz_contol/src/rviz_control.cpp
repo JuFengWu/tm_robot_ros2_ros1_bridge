@@ -33,6 +33,7 @@ class RvizControl{
 
   const robot_state::JointModelGroup* jointModelGroup;
   std::unique_ptr <moveit::planning_interface::MoveGroupInterface> moveGroup;
+  std::string planningGroup;
 
   void interactive_reaction(const geometry_msgs::Pose & markerPose);
 
@@ -44,13 +45,15 @@ class RvizControl{
   void send_joint_position_to_robot(std::vector<double> jointValues);
  public:
   void pass_robot_position_to_marker();
-  RvizControl();
+  RvizControl(std::string planningGroup);
   static void wait_connect_success(ros::Publisher publisher);
 };
 
-RvizControl::RvizControl() {
-  moveGroup = std::make_unique<moveit::planning_interface::MoveGroupInterface>("tm_arm");
-  jointModelGroup = moveGroup->getCurrentState()->getJointModelGroup("tm_arm");
+RvizControl::RvizControl(std::string planningGroup):
+ planningGroup(planningGroup)
+ ,moveGroup(std::make_unique<moveit::planning_interface::MoveGroupInterface>(planningGroup)) {
+
+  jointModelGroup = moveGroup->getCurrentState()->getJointModelGroup(planningGroup);
   interactiveReactionSub = nodeHandle.subscribe("tm_interactive_reaction", 1000, &RvizControl::interactive_reaction, this);
 
   std::thread(&RvizControl::pass_robot_position_to_marker, this).detach();
@@ -80,7 +83,7 @@ void RvizControl::pass_robot_position_to_marker() {
 
 bool RvizControl::robot_inverse_kinematics(geometry_msgs::Pose markerPose, std::vector< double > &jointValues) {
   robot_state::RobotState robotState(*moveGroup->getCurrentState());
-  jointModelGroup = moveGroup->getCurrentState()->getJointModelGroup("tm_arm");
+  jointModelGroup = moveGroup->getCurrentState()->getJointModelGroup(planningGroup);
   bool isIkSuccess = robotState.setFromIK(jointModelGroup, markerPose);
   if (isIkSuccess) {
     robotState.copyJointGroupPositions(jointModelGroup, jointValues);
@@ -126,8 +129,8 @@ int main(int argc, char **argv) {
   ros::init(argc, argv, "tm_rviz_control");
   ros::AsyncSpinner spinner(5);
   spinner.start();
-
-  std::unique_ptr<RvizControl> rvizControl = std::make_unique<RvizControl>();
+  std::string planningGroup = "tm_arm";
+  std::unique_ptr<RvizControl> rvizControl = std::make_unique<RvizControl>(planningGroup);
 
   std::cout<< "rviz_control started!"<< std::endl;
 

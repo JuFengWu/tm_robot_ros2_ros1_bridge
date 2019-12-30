@@ -54,7 +54,6 @@ class JointTrajectoryAction{
       std::cout<< trajectory.points[i].positions[0]<< ","<< trajectory.points[i].positions[1]<< ","<< trajectory.points[i].positions[2]<< ","<<
       trajectory.points[i].positions[3]<< ","<< trajectory.points[i].positions[4]<< ","<< trajectory.points[i].positions[5]<< std::endl;
     }
-
   }
 
   void execute_cb(const control_msgs::FollowJointTrajectoryGoalConstPtr msg){
@@ -70,8 +69,6 @@ class JointTrajectoryAction{
       actionServer.setSucceeded();
     }
   }
-
-
 };
 
 
